@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_firebase_mxh_tinavibe/features/post/presentation/components/my_drawer_tile.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_firebase_mxh_tinavibe/features/auth/presentation/cubits/auth_cubit.dart';
+import 'package:flutter_firebase_mxh_tinavibe/features/home/presentation/components/my_drawer_tile.dart';
+import 'package:flutter_firebase_mxh_tinavibe/features/profile/presentation/pages/profile_page.dart';
 
 class MyDrawer extends StatelessWidget {
   const MyDrawer({super.key});
@@ -32,7 +35,22 @@ class MyDrawer extends StatelessWidget {
               MyDrawerTile(
                 title: "P R O F I L E",
                 icon: Icons.person,
-                onTap: () {},
+                onTap: () {
+                  //pop menu drawer
+                  Navigator.of(context).pop();
+
+                  //get current user id
+                  final user = context.read<AuthCubit>().currentUser;
+                  String? uid = user!.uid;
+
+                  // navigate to profile page
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ProfilePage(uid: uid),
+                    ),
+                  );
+                },
               ),
               MyDrawerTile(
                 title: "S E A R C H",
@@ -48,7 +66,7 @@ class MyDrawer extends StatelessWidget {
               MyDrawerTile(
                 title: "L O G O U T",
                 icon: Icons.logout,
-                onTap: () {},
+                onTap: () => context.read<AuthCubit>().logout(),
               ),
             ],
           ),

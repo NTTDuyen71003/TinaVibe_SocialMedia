@@ -4,7 +4,10 @@ import 'package:flutter_firebase_mxh_tinavibe/features/auth/data/firebase_auth_r
 import 'package:flutter_firebase_mxh_tinavibe/features/auth/presentation/cubits/auth_cubit.dart';
 import 'package:flutter_firebase_mxh_tinavibe/features/auth/presentation/cubits/auth_states.dart';
 import 'package:flutter_firebase_mxh_tinavibe/features/auth/presentation/pages/auth_page.dart';
-import 'package:flutter_firebase_mxh_tinavibe/features/post/presentation/pages/home_page.dart';
+import 'package:flutter_firebase_mxh_tinavibe/features/home/presentation/pages/home_page.dart';
+import 'package:flutter_firebase_mxh_tinavibe/features/profile/data/firebase_profile_repository.dart';
+import 'package:flutter_firebase_mxh_tinavibe/features/profile/presentation/cubits/profile_cubit.dart';
+import 'package:flutter_firebase_mxh_tinavibe/features/storage/data/firebase_storage_repository.dart';
 import 'package:flutter_firebase_mxh_tinavibe/themes/light_mode.dart';
 
 /*
@@ -27,15 +30,30 @@ Repositories: for the database
 */
 class MyApp extends StatelessWidget {
   //auth repo
-  final authRepository = FirebaseAuthRepository();
-
+  final firebaseAuthRepository = FirebaseAuthRepository();
+  //profile repo
+  final firebaseProfileRepository = FirebaseProfileRepository();
+  //storage repo
+  final firebaseStorageRepository = FirebaseStorageRepository();
   MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) =>
-          AuthCubit(authRepository: authRepository)..checkAuth(),
+    return MultiBlocProvider(
+      providers: [
+        //auth cubit
+        BlocProvider<AuthCubit>(
+          create: (context) =>
+              AuthCubit(authRepository: firebaseAuthRepository)..checkAuth(),
+        ),
+        //profile cubit
+        BlocProvider<ProfileCubit>(
+          create: (context) => ProfileCubit(
+            profileRepository: firebaseProfileRepository,
+            storageRepository: firebaseStorageRepository,
+          ),
+        ),
+      ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         theme: lightMode,
