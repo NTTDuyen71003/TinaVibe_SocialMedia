@@ -129,86 +129,88 @@ class _EditProfilePageState extends State<EditProfilePage> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          //profile picture
-          Center(
-            child: Container(
-              height: 200,
-              width: 200,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.secondary,
-                shape: BoxShape.circle,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            //profile picture
+            Center(
+              child: Container(
+                height: 200,
+                width: 200,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.secondary,
+                  shape: BoxShape.circle,
+                ),
+                clipBehavior: Clip.hardEdge,
+                child:
+                    //display selected image for mobile
+                    (!kIsWeb && imagePickedFile != null)
+                        ? Image.file(
+                            File(imagePickedFile!.path!),
+                            fit: BoxFit.cover,
+                          )
+                        :
+                        //display selected image for web
+                        (kIsWeb && webImage != null)
+                            ? Image.memory(webImage!)
+                            :
+                            // no image selected -> display existing profile pic
+                            CachedNetworkImage(
+                                imageUrl: widget.user.profileImageUrl,
+                                //loading
+                                placeholder: (context, url) =>
+                                    const CircularProgressIndicator(),
+
+                                //error
+                                errorWidget: (context, url, error) => Icon(
+                                  Icons.person,
+                                  size: 72,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                                //loaded
+                                imageBuilder: (context, imageProvider) => Image(
+                                  image: imageProvider,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
               ),
-              clipBehavior: Clip.hardEdge,
-              child:
-                  //display selected image for mobile
-                  (!kIsWeb && imagePickedFile != null)
-                      ? Image.file(
-                          File(imagePickedFile!.path!),
-                          fit: BoxFit.cover,
-                        )
-                      :
-                      //display selected image for web
-                      (kIsWeb && webImage != null)
-                          ? Image.memory(webImage!)
-                          :
-                          // no image selected -> display existing profile pic
-                          CachedNetworkImage(
-                              imageUrl: widget.user.profileImageUrl,
-                              //loading
-                              placeholder: (context, url) =>
-                                  const CircularProgressIndicator(),
-
-                              //error
-                              errorWidget: (context, url, error) => Icon(
-                                Icons.person,
-                                size: 72,
-                                color: Theme.of(context).colorScheme.primary,
-                              ),
-                              //loaded
-                              imageBuilder: (context, imageProvider) => Image(
-                                image: imageProvider,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
             ),
-          ),
 
-          const SizedBox(height: 25),
+            const SizedBox(height: 25),
 
-          //pick image button
-          Center(
-            child: MaterialButton(
-              onPressed: pickImage,
-              color: Colors.blue,
-              child: const Text("Pick image"),
+            //pick image button
+            Center(
+              child: MaterialButton(
+                onPressed: pickImage,
+                color: Colors.blue,
+                child: const Text("Pick image"),
+              ),
             ),
-          ),
 
-          //name
-          const Text("Name"),
-          const SizedBox(height: 10),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 25.0),
-            child: MyTextField(
-                controller: nameTextController,
-                hintText: widget.user.name,
-                obscureText: false),
-          ),
-          const SizedBox(height: 25),
+            //name
+            // const Text("Name"),
+            // const SizedBox(height: 10),
+            // Padding(
+            //   padding: const EdgeInsets.symmetric(horizontal: 25.0),
+            //   child: MyTextField(
+            //       controller: nameTextController,
+            //       hintText: widget.user.name,
+            //       obscureText: false),
+            // ),
+            // const SizedBox(height: 25),
 
-          //bio
-          const Text("Bio"),
-          const SizedBox(height: 10),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 25.0),
-            child: MyTextField(
-                controller: bioTextController,
-                hintText: widget.user.bio,
-                obscureText: false),
-          ),
-        ],
+            //bio
+            const Text("Bio"),
+            const SizedBox(height: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 25.0),
+              child: MyTextField(
+                  controller: bioTextController,
+                  hintText: widget.user.bio,
+                  obscureText: false),
+            ),
+          ],
+        ),
       ),
     );
   }

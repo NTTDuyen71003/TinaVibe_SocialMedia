@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_firebase_mxh_tinavibe/features/profile/domain/entities/profile_user.dart';
 import 'package:flutter_firebase_mxh_tinavibe/features/profile/domain/entities/repository/profile_repository.dart';
 import 'package:flutter_firebase_mxh_tinavibe/features/profile/presentation/cubits/profile_states.dart';
 import 'package:flutter_firebase_mxh_tinavibe/features/storage/domain/storage_repository.dart';
@@ -14,7 +15,7 @@ class ProfileCubit extends Cubit<ProfileStates> {
     required this.storageRepository,
   }) : super(ProfileInitial());
 
-  //fetch user profile using repo
+  //fetch user profile using repo -> useful for loading profile pages
   Future<void> fetchUserProfile(String uid) async {
     try {
       emit(ProfileLoading());
@@ -27,6 +28,12 @@ class ProfileCubit extends Cubit<ProfileStates> {
     } catch (e) {
       emit(ProfileError(e.toString()));
     }
+  }
+
+  //return user profile given uid -> useful for loading many profiles for posts
+  Future<ProfileUser?> getUserProfile(String uid) async {
+    final user = await profileRepository.fetchUserProfile(uid);
+    return user;
   }
 
   // update name, bio and profile picture
@@ -82,6 +89,15 @@ class ProfileCubit extends Cubit<ProfileStates> {
       await fetchUserProfile(uid);
     } catch (e) {
       emit(ProfileError("Error updating profile: $e"));
+    }
+  }
+
+  // toggle follow/unfollow
+  Future<void> toggleFollow(String currentUserId, String targetUserId) async {
+    try {
+      await profileRepository.toggleFollow(currentUserId, targetUserId);
+    } catch (e) {
+      emit(ProfileError("Error toggling follow: $e"));
     }
   }
 }

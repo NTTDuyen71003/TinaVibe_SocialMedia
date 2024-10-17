@@ -5,10 +5,14 @@ import 'package:flutter_firebase_mxh_tinavibe/features/auth/presentation/cubits/
 import 'package:flutter_firebase_mxh_tinavibe/features/auth/presentation/cubits/auth_states.dart';
 import 'package:flutter_firebase_mxh_tinavibe/features/auth/presentation/pages/auth_page.dart';
 import 'package:flutter_firebase_mxh_tinavibe/features/home/presentation/pages/home_page.dart';
+import 'package:flutter_firebase_mxh_tinavibe/features/post/data/firebase_post_repository.dart';
+import 'package:flutter_firebase_mxh_tinavibe/features/post/presentation/cubits/post_cubit.dart';
 import 'package:flutter_firebase_mxh_tinavibe/features/profile/data/firebase_profile_repository.dart';
 import 'package:flutter_firebase_mxh_tinavibe/features/profile/presentation/cubits/profile_cubit.dart';
+import 'package:flutter_firebase_mxh_tinavibe/features/search/data/firebase_search_repository.dart';
+import 'package:flutter_firebase_mxh_tinavibe/features/search/presentation/cubits/search_cubit.dart';
 import 'package:flutter_firebase_mxh_tinavibe/features/storage/data/firebase_storage_repository.dart';
-import 'package:flutter_firebase_mxh_tinavibe/themes/light_mode.dart';
+import 'package:flutter_firebase_mxh_tinavibe/themes/theme_cubit.dart';
 
 /*
 APP - Root Level
@@ -35,6 +39,11 @@ class MyApp extends StatelessWidget {
   final firebaseProfileRepository = FirebaseProfileRepository();
   //storage repo
   final firebaseStorageRepository = FirebaseStorageRepository();
+  //post repo
+  final firebasePostRepository = FirebasePostRepository();
+  //search repo
+  final firebaseSearchRepository = FirebaseSearchRepository();
+
   MyApp({super.key});
 
   @override
@@ -53,39 +62,55 @@ class MyApp extends StatelessWidget {
             storageRepository: firebaseStorageRepository,
           ),
         ),
+        //post cubit
+        BlocProvider<PostCubit>(
+          create: (context) => PostCubit(
+            postRepository: firebasePostRepository,
+            storageRepository: firebaseStorageRepository,
+          ),
+        ),
+        //search cubit
+        BlocProvider<SearchCubit>(
+          create: (context) =>
+              SearchCubit(searchRepository: firebaseSearchRepository),
+        ),
+        //theme cubit
+        BlocProvider<ThemeCubit>(create: (context) => ThemeCubit()),
       ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: lightMode,
-        home: BlocConsumer<AuthCubit, AuthState>(
-          builder: (context, authState) {
-            print(authState);
-            // unauthenticated -> auth page (login/register)
-            if (authState is Unauthenticated) {
-              return const AuthPage();
-            }
-            // authenticated -> home page
-            if (authState is Authenticated) {
-              return const HomePage();
-            }
-            //loading..
-            else {
-              return const Scaffold(
-                body: Center(
-                  child: CircularProgressIndicator(),
-                ),
-              );
-            }
-          },
-          listener: (context, state) {
-            if (state is AuthError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                ),
-              );
-            }
-          },
+      child: BlocBuilder<ThemeCubit, ThemeData>(
+        builder: (context, currentTheme) => MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: currentTheme,
+          home: BlocConsumer<AuthCubit, AuthState>(
+            builder: (context, authState) {
+              print(authState);
+              // unauthenticated -> auth page (login/register)
+              if (authState is Unauthenticated) {
+                return const AuthPage();
+              }
+              // authenticated -> home page
+              if (authState is Authenticated) {
+                return const HomePage();
+              }
+              //loading..
+              else {
+                return const Scaffold(
+                  body: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              }
+            },
+            listener: (context, state) {
+              if (state is AuthError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                  ),
+                );
+              }
+            },
+          ),
         ),
       ),
     );
