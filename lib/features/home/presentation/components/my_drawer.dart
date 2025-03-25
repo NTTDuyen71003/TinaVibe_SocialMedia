@@ -30,12 +30,12 @@ class MyDrawer extends StatelessWidget {
                 color: Theme.of(context).colorScheme.secondary,
               ),
               MyDrawerTile(
-                title: "H O M E",
+                title: "HOME",
                 icon: Icons.home,
                 onTap: () => Navigator.of(context).pop(),
               ),
               MyDrawerTile(
-                title: "P R O F I L E",
+                title: "PROFILE",
                 icon: Icons.person,
                 onTap: () {
                   //pop menu drawer
@@ -55,7 +55,7 @@ class MyDrawer extends StatelessWidget {
                 },
               ),
               MyDrawerTile(
-                title: "S E A R C H",
+                title: "SEARCH",
                 icon: Icons.search,
                 onTap: () => Navigator.push(
                   context,
@@ -65,7 +65,7 @@ class MyDrawer extends StatelessWidget {
                 ),
               ),
               MyDrawerTile(
-                title: "S E T T I N G S",
+                title: "SETTINGS",
                 icon: Icons.settings,
                 onTap: () => Navigator.push(
                   context,
@@ -76,7 +76,7 @@ class MyDrawer extends StatelessWidget {
               ),
               const Spacer(),
               MyDrawerTile(
-                title: "L O G O U T",
+                title: "LOGOUT",
                 icon: Icons.logout,
                 onTap: () => context.read<AuthCubit>().logout(),
               ),

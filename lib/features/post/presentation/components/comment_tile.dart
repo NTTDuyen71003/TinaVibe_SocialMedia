@@ -4,6 +4,9 @@ import 'package:flutter_firebase_mxh_tinavibe/features/auth/domain/entities/app_
 import 'package:flutter_firebase_mxh_tinavibe/features/auth/presentation/cubits/auth_cubit.dart';
 import 'package:flutter_firebase_mxh_tinavibe/features/post/domain/entities/comments.dart';
 import 'package:flutter_firebase_mxh_tinavibe/features/post/presentation/cubits/post_cubit.dart';
+import 'package:flutter_firebase_mxh_tinavibe/features/profile/presentation/pages/profile_page.dart';
+import 'package:flutter_firebase_mxh_tinavibe/themes/light_mode.dart';
+import 'package:get/get.dart';
 
 class CommentTile extends StatefulWidget {
   final Comment comment;
@@ -36,22 +39,37 @@ class _CommentTileState extends State<CommentTile> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Delete comment?"),
+        title: Text("delete_comment_title".tr),
         actions: [
-          // cancel button
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text("Cancel"),
+          // Cancel button with hover effect
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.grey.shade300, // Default background
+                foregroundColor: Colors.black, // Default text color
+              ),
+              child: Text("post_time_cancel".tr),
+            ),
           ),
-          // delete button
-          TextButton(
-            onPressed: () {
-              context
-                  .read<PostCubit>()
-                  .deleteComment(widget.comment.postId, widget.comment.id);
-              Navigator.of(context).pop();
-            },
-            child: const Text("Delete"),
+          // Delete button with hover effect
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: TextButton(
+              onPressed: () {
+                context
+                    .read<PostCubit>()
+                    .deleteComment(widget.comment.postId, widget.comment.id);
+                Navigator.of(context).pop();
+              },
+              style: TextButton.styleFrom(
+                backgroundColor: const Color(0xfff36f7d), // Default background
+                foregroundColor:
+                    CustomThemeData.getTextColor(context), // Default text color
+              ),
+              child: Text("post_time_confirm".tr),
+            ),
           ),
         ],
       ),
@@ -61,47 +79,83 @@ class _CommentTileState extends State<CommentTile> {
   String _formatTimestamp(DateTime timestamp) {
     final now = DateTime.now();
     final diff = now.difference(timestamp);
+    String locale = Get.locale?.languageCode ?? 'en'; // Get the current locale
 
     if (diff.inDays >= 30) {
-      return '${(diff.inDays / 30).floor()} month${(diff.inDays / 30).floor() > 1 ? 's' : ''} ago';
+      int months = (diff.inDays / 30).floor();
+      String pluralSuffix = (locale == 'en' && months > 1) ? 's' : '';
+      return '$months ${"post_time_month".tr}$pluralSuffix ${"post_time_ago".tr}';
     } else if (diff.inDays >= 7) {
-      return '${(diff.inDays / 7).floor()} week${(diff.inDays / 7).floor() > 1 ? 's' : ''} ago';
+      int weeks = (diff.inDays / 7).floor();
+      String pluralSuffix = (locale == 'en' && weeks > 1) ? 's' : '';
+      return '$weeks ${"post_time_week".tr}$pluralSuffix ${"post_time_ago".tr}';
     } else if (diff.inDays >= 1) {
-      return '${diff.inDays} day${diff.inDays > 1 ? 's' : ''} ago';
+      int days = diff.inDays;
+      String pluralSuffix = (locale == 'en' && days > 1) ? 's' : '';
+      return '$days ${"post_time_day".tr}$pluralSuffix ${"post_time_ago".tr}';
     } else if (diff.inHours >= 1) {
-      return '${diff.inHours} hour${diff.inHours > 1 ? 's' : ''} ago';
+      int hours = diff.inHours;
+      String pluralSuffix = (locale == 'en' && hours > 1) ? 's' : '';
+      return '$hours ${"post_time_hour".tr}$pluralSuffix ${"post_time_ago".tr}';
     } else if (diff.inMinutes >= 1) {
-      return '${diff.inMinutes} minute${diff.inMinutes > 1 ? 's' : ''} ago';
+      int minutes = diff.inMinutes;
+      String pluralSuffix = (locale == 'en' && minutes > 1) ? 's' : '';
+      return '$minutes ${"post_time_minute".tr}$pluralSuffix ${"post_time_ago".tr}';
     } else {
-      return 'Just now';
+      return "post_time_now".tr; // Return "just now" or an equivalent
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-      child: Row(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            widget.comment.userName,
-            style: const TextStyle(fontWeight: FontWeight.bold),
+          // First row: Username and delete icon
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              // User name
+              GestureDetector(
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ProfilePage(
+                      uid: widget.comment.userId,
+                    ),
+                  ),
+                ),
+                child: Text(
+                  widget.comment.userName,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ),
+              // Delete icon (only show if it's the user's own post)
+              if (isOwnPost)
+                MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    onTap: showOptions,
+                    child: Icon(
+                      Icons.delete,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                ),
+            ],
           ),
-          const SizedBox(width: 10),
-          Expanded(child: Text(widget.comment.text)),
-          const SizedBox(width: 10),
+          const SizedBox(
+              height: 5), // Spacing between username and comment text
+          // Second row: Comment text
+          Text(widget.comment.text),
+          const SizedBox(height: 5), // Spacing before timestamp
+          // Timestamp
           Text(
             _formatTimestamp(widget.comment.timestamp),
-            style: TextStyle(color: Colors.grey, fontSize: 12),
+            style: const TextStyle(color: Colors.grey, fontSize: 12),
           ),
-          if (isOwnPost)
-            GestureDetector(
-              onTap: showOptions,
-              child: Icon(
-                Icons.more_horiz,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            )
         ],
       ),
     );

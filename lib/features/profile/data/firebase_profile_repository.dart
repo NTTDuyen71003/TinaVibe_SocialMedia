@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_firebase_mxh_tinavibe/features/profile/domain/entities/profile_user.dart';
-import 'package:flutter_firebase_mxh_tinavibe/features/profile/domain/entities/repository/profile_repository.dart';
+import 'package:flutter_firebase_mxh_tinavibe/features/profile/domain/repo/profile_repository.dart';
 
 class FirebaseProfileRepository implements ProfileRepository {
   final FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
@@ -8,14 +8,12 @@ class FirebaseProfileRepository implements ProfileRepository {
   @override
   Future<ProfileUser?> fetchUserProfile(String uid) async {
     try {
-      //get user document from firestore
       final userDoc =
           await firebaseFirestore.collection('users').doc(uid).get();
 
       if (userDoc.exists) {
         final userData = userDoc.data();
         if (userData != null) {
-          //fetch followers & following
           final followers = List<String>.from(userData['followers'] ?? []);
           final following = List<String>.from(userData['following'] ?? []);
           return ProfileUser(

@@ -10,21 +10,21 @@ class FirebaseAuthRepository implements AuthRepository {
   @override
   Future<AppUser?> loginWithEmailPassword(String email, String password) async {
     try {
-      // attempt sign in
+      // thử đăng nhập
       UserCredential userCredential = await firebaseAuth
           .signInWithEmailAndPassword(email: email, password: password);
-      //fetch user document from firestore
+      //fetch dữ liệu người dùng từ Firestore
       DocumentSnapshot userDoc = await firebaseFirestore
           .collection('users')
           .doc(userCredential.user!.uid)
           .get();
-      // create user
+      // tạo người dùng mới
       AppUser user = AppUser(
         uid: userCredential.user!.uid,
         email: email,
         name: userDoc['name'],
       );
-
+      // nếu thành công, trả về đối tượng AppUser
       return user;
     } catch (e) {
       throw Exception('Login failed: $e');
@@ -35,22 +35,33 @@ class FirebaseAuthRepository implements AuthRepository {
   Future<AppUser?> registerWithEmailPassword(
       String name, String email, String password) async {
     try {
-      // attempt sign up
+      // thử đăng ký
       UserCredential userCredential = await firebaseAuth
           .createUserWithEmailAndPassword(email: email, password: password);
-      // create user
-      AppUser user = AppUser(
-        uid: userCredential.user!.uid,
-        email: email,
-        name: name,
-      );
-      //save user data in firestore
-      await firebaseFirestore
+      // Kiểm tra xem người dùng đã tồn tại trong Firestore chưa
+      DocumentSnapshot userDoc = await firebaseFirestore
           .collection("users")
-          .doc(user.uid)
-          .set(user.toJson());
-      //return user
-      return user;
+          .doc(userCredential.user!.uid)
+          .get();
+      // Nếu người dùng chưa tồn tại, tạo đối tượng AppUser
+      if (!userDoc.exists) {
+        AppUser user = AppUser(
+          // tạo người dùng mới
+          uid: userCredential.user!.uid,
+          email: email,
+          name: name,
+        );
+        // Lưu dữ liệu người dùng vào Firestore
+        await firebaseFirestore
+            .collection("users")
+            .doc(user.uid)
+            .set(user.toJson());
+
+        // Trả về đối tượng AppUser
+        return user;
+      } else {
+        throw Exception('Email này đã được sử dụng.');
+      }
     } catch (e) {
       throw Exception('Login failed: $e');
     }
@@ -87,11 +98,14 @@ class FirebaseAuthRepository implements AuthRepository {
   }
 
   // Phương thức đăng nhập bằng Google
+  @override
   Future<AppUser?> signInWithGoogle() async {
-    await GoogleSignIn().signOut(); // Đăng xuất trước khi đăng nhập
+    // Luôn đăng xuất trước khi đăng nhập, để có thể sử dụng được account khác
+    await GoogleSignIn().signOut();
     try {
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) return null; // Người dùng đã hủy đăng nhập
+      // Nếu người dùng hủy đăng nhập
+      if (googleUser == null) return null;
 
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;

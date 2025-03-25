@@ -1,5 +1,6 @@
 /*
-Auth States
+Auth States:  định nghĩa các trạng thái khác nhau mà ứng dụng có thể gặp phải 
+trong quá trình xác thực người dùng.
 */
 
 import 'package:flutter_firebase_mxh_tinavibe/features/auth/domain/entities/app_user.dart';

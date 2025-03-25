@@ -30,19 +30,17 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
-
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
+  get: ^4.6.5
+  image_picker: ^0.8.7+3
   cupertino_icons: ^1.0.8
-  firebase_core: ^3.6.0
-  firebase_auth: ^5.3.1
-  flutter_bloc: ^8.1.6
-  cloud_firestore: ^5.4.4
-  google_sign_in: ^6.2.1
-  firebase_storage: ^12.3.3
-  file_picker: ^8.1.2
-  cached_network_image: ^3.4.1
+  firebase_core:
+  firebase_auth: 
+  flutter_bloc: 
+  cloud_firestore: 
+  google_sign_in:
+  firebase_storage: 
+  file_picker: 
+  cached_network_image:
 
 dev_dependencies:
   flutter_test:
@@ -65,6 +63,14 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+  assets:
+    - assets/images/Logo_TinaVibe.png
+    - assets/icons/chat.png
+    - assets/icons/notification.png
+    - assets/icons/post.png
+    - assets/icons/language.png
+    - assets/images/google.png
+    - assets/images/default_profile_image.jpg
 
   # To add assets to your application, add an assets section, like this:
   # assets:

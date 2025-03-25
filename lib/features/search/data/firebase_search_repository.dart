@@ -24,3 +24,29 @@ class FirebaseSearchRepository implements SearchRepository {
     }
   }
 }
+
+// class FirebaseSearchRepository implements SearchRepository {
+//   @override
+//   Future<List<ProfileUser?>> searchUsers(
+//       String query, String currentUserId) async {
+//     try {
+//       // Chuyển đổi query về chữ thường
+//       final lowerCaseQuery = query.toLowerCase();
+
+//       // Lấy tất cả người dùng từ Firestore
+//       final result = await FirebaseFirestore.instance.collection("users").get();
+
+//        // Lọc ra những người dùng có tên chứa query không phân biệt chữ hoa thường trừ ng dùng
+//       final users = result.docs
+//           .map((doc) => ProfileUser.fromJson(doc.data()))
+//           .where((user) =>
+//               user.name.toLowerCase().contains(lowerCaseQuery) &&
+//               user.uid != currentUserId)
+//           .toList();
+
+//       return users;
+//     } catch (e) {
+//       throw Exception("Error searching users: $e");
+//     }
+//   }
+// }

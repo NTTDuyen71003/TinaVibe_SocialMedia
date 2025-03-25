@@ -1,5 +1,6 @@
 /*
-Auth Repository - Outlines the possible auth operations for this app.
+Auth Repository - Liệt kê và phác thảo các thao tác xác thực(authentication) 
+có thể có.
 */
 
 import 'package:flutter_firebase_mxh_tinavibe/features/auth/domain/entities/app_user.dart';

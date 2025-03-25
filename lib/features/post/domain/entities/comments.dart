@@ -7,6 +7,7 @@ class Comment {
   final String userName;
   final String text;
   final DateTime timestamp;
+
   Comment({
     required this.id,
     required this.postId,

@@ -1,65 +1,101 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class ProfileStats extends StatelessWidget {
   final int postCount;
   final int followerCount;
   final int followingCount;
-  final void Function()? onTap;
+  final VoidCallback? onPostsTap;
+  final VoidCallback? onFollowersTap;
+  final VoidCallback? onFollowingTap;
 
   const ProfileStats({
     super.key,
     required this.postCount,
     required this.followerCount,
     required this.followingCount,
-    required this.onTap,
+    this.onPostsTap,
+    this.onFollowersTap,
+    this.onFollowingTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    //text style for count
+    // Text style for count
     var textStyleForCount = TextStyle(
         fontSize: 20, color: Theme.of(context).colorScheme.inversePrimary);
 
-    //text style for text
+    // Text style for text
     var textStyleForText =
         TextStyle(color: Theme.of(context).colorScheme.primary);
 
-    return GestureDetector(
-      onTap: onTap,
+    return MouseRegion(
+      cursor: SystemMouseCursors.click, // Change cursor on hover
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          //posts
-          SizedBox(
-            width: 100,
-            child: Column(
-              children: [
-                Text(postCount.toString(), style: textStyleForCount),
-                Text("Posts", style: textStyleForText),
-              ],
+          // Posts
+          GestureDetector(
+            onTap: onPostsTap,
+            child: SizedBox(
+              width: 100,
+              child: Column(
+                children: [
+                  Text(
+                    postCount.toString(),
+                    style: textStyleForCount, // Adjust the font size here
+                  ),
+                  Text(
+                    ("bio_post_status".tr),
+                    style: textStyleForText.copyWith(
+                        fontSize: 12), // Adjust the font size here
+                  ),
+                ],
+              ),
             ),
           ),
 
-          //followers
-          SizedBox(
-            width: 100,
-            child: Column(
-              children: [
-                Text(followerCount.toString(), style: textStyleForCount),
-                Text("Followers", style: textStyleForText),
-              ],
+          // Followers
+          GestureDetector(
+            onTap: onFollowersTap,
+            child: SizedBox(
+              width: 100,
+              child: Column(
+                children: [
+                  Text(
+                    followerCount.toString(),
+                    style: textStyleForCount, // Adjust the font size here
+                  ),
+                  Text(
+                    ("follower_status".tr),
+                    style: textStyleForText.copyWith(
+                        fontSize: 12), // Adjust the font size here
+                  ),
+                ],
+              ),
             ),
           ),
-          //following
-          SizedBox(
-            width: 100,
-            child: Column(
-              children: [
-                Text(followingCount.toString(), style: textStyleForCount),
-                Text("Following", style: textStyleForText),
-              ],
+
+          // Following
+          GestureDetector(
+            onTap: onFollowingTap,
+            child: SizedBox(
+              width: 100,
+              child: Column(
+                children: [
+                  Text(
+                    followingCount.toString(),
+                    style: textStyleForCount, // Adjust the font size here
+                  ),
+                  Text(
+                    ("following_status".tr),
+                    style: textStyleForText.copyWith(
+                        fontSize: 12), // Adjust the font size here
+                  ),
+                ],
+              ),
             ),
-          )
+          ),
         ],
       ),
     );

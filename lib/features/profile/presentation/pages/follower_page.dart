@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_firebase_mxh_tinavibe/features/profile/presentation/components/user_tile.dart';
 import 'package:flutter_firebase_mxh_tinavibe/features/profile/presentation/cubits/profile_cubit.dart';
+import 'package:get/get.dart';
 
 class FollowerPage extends StatelessWidget {
   final List<String> followers;
@@ -16,20 +17,30 @@ class FollowerPage extends StatelessWidget {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
+          leading: Tooltip(
+            message:
+                ("goback_arrow".tr), // Translated tooltip for the back button
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back), // Back arrow icon
+              onPressed: () {
+                Navigator.of(context).pop(); // Go back when pressed
+              },
+            ),
+          ),
           bottom: TabBar(
             dividerColor: Colors.transparent,
             labelColor: Theme.of(context).colorScheme.inversePrimary,
             unselectedLabelColor: Theme.of(context).colorScheme.primary,
-            tabs: const [
-              Tab(text: "Followers"),
-              Tab(text: "Following"),
+            tabs: [
+              Tab(text: ("follower_status".tr)),
+              Tab(text: ("following_status".tr)),
             ],
           ),
         ),
         //Tab bar view
         body: TabBarView(children: [
-          _buildUserList(followers, "No followers", context),
-          _buildUserList(following, "No following", context),
+          _buildUserList(followers, ("no_follower_status".tr), context),
+          _buildUserList(following, ("no_following_status".tr), context),
         ]),
       ),
     );
@@ -53,11 +64,11 @@ class FollowerPage extends StatelessWidget {
                   } else if (snapshot.connectionState ==
                       ConnectionState.waiting) {
                     return ListTile(
-                      title: Text("Loading..."),
+                      title: Text(("loading_status".tr)),
                     );
                   } else {
                     return ListTile(
-                      title: Text("User not found..."),
+                      title: Text(("user_notfound_error".tr)),
                     );
                   }
                 },

@@ -46,6 +46,20 @@ class PostCubit extends Cubit<PostState> {
     }
   }
 
+  Future<void> updatePost(
+      String postId, Map<String, dynamic> updatedData) async {
+    emit(PostUpdating());
+    try {
+      await postRepository.updatePost(postId, updatedData);
+      emit(PostUpdatedSuccess());
+
+      //re-fetch all post
+      fetchAllPosts();
+    } catch (e) {
+      emit(PostUpdatedError("Failed to update the post: $e"));
+    }
+  }
+
   //fetch all posts
   Future<void> fetchAllPosts() async {
     try {

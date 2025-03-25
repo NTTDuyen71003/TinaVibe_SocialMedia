@@ -13,35 +13,27 @@ import 'package:flutter_firebase_mxh_tinavibe/features/search/data/firebase_sear
 import 'package:flutter_firebase_mxh_tinavibe/features/search/presentation/cubits/search_cubit.dart';
 import 'package:flutter_firebase_mxh_tinavibe/features/storage/data/firebase_storage_repository.dart';
 import 'package:flutter_firebase_mxh_tinavibe/themes/theme_cubit.dart';
+import 'package:get/get.dart';
+import 'translations/translation_service.dart';
 
 /*
-APP - Root Level
-
-Repositories: for the database
-  -firebase
-
-  Bloc Providers: for state management
+Bloc Providers: quản lý trạng thái
   -auth
   -profile
-  -search
   -post
+  -search
   -theme
 
-  Check Auth State
-  -unauthenticated -> auth page(login/register)
-  -authenticated -> home page
-
+  Kiểm tra trạng thái xác thực
+  -unauthenticated -> chuyển tới trang login/register
+  -authenticated -> sẽ chuyển tới Home page
 */
 class MyApp extends StatelessWidget {
-  //auth repo
+  // Repositories
   final firebaseAuthRepository = FirebaseAuthRepository();
-  //profile repo
   final firebaseProfileRepository = FirebaseProfileRepository();
-  //storage repo
   final firebaseStorageRepository = FirebaseStorageRepository();
-  //post repo
   final firebasePostRepository = FirebasePostRepository();
-  //search repo
   final firebaseSearchRepository = FirebaseSearchRepository();
 
   MyApp({super.key});
@@ -50,56 +42,54 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        //auth cubit
+        // Auth Cubit
         BlocProvider<AuthCubit>(
           create: (context) =>
               AuthCubit(authRepository: firebaseAuthRepository)..checkAuth(),
         ),
-        //profile cubit
+        // Profile Cubit
         BlocProvider<ProfileCubit>(
           create: (context) => ProfileCubit(
             profileRepository: firebaseProfileRepository,
             storageRepository: firebaseStorageRepository,
           ),
         ),
-        //post cubit
+        // Post Cubit
         BlocProvider<PostCubit>(
           create: (context) => PostCubit(
             postRepository: firebasePostRepository,
             storageRepository: firebaseStorageRepository,
           ),
         ),
-        //search cubit
+        // Search Cubit
         BlocProvider<SearchCubit>(
           create: (context) =>
               SearchCubit(searchRepository: firebaseSearchRepository),
         ),
-        //theme cubit
+        // Theme Cubit
         BlocProvider<ThemeCubit>(create: (context) => ThemeCubit()),
       ],
       child: BlocBuilder<ThemeCubit, ThemeData>(
-        builder: (context, currentTheme) => MaterialApp(
+        builder: (context, currentTheme) => GetMaterialApp(
+          // Use GetMaterialApp
           debugShowCheckedModeBanner: false,
           theme: currentTheme,
+          translations: TranslationService(), // Add translation service
+          locale: const Locale('vi'), // Set default locale
+          fallbackLocale: const Locale('en'), // Set fallback locale
           home: BlocConsumer<AuthCubit, AuthState>(
             builder: (context, authState) {
-              print(authState);
-              // unauthenticated -> auth page (login/register)
               if (authState is Unauthenticated) {
                 return const AuthPage();
               }
-              // authenticated -> home page
               if (authState is Authenticated) {
                 return const HomePage();
               }
-              //loading..
-              else {
-                return const Scaffold(
-                  body: Center(
-                    child: CircularProgressIndicator(),
-                  ),
-                );
-              }
+              return const Scaffold(
+                body: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
             },
             listener: (context, state) {
               if (state is AuthError) {

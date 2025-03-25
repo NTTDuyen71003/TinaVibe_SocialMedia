@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_firebase_mxh_tinavibe/features/auth/presentation/components/my_button.dart';
-import 'package:flutter_firebase_mxh_tinavibe/features/auth/presentation/components/my_text_field.dart';
 import 'package:flutter_firebase_mxh_tinavibe/features/auth/presentation/cubits/auth_cubit.dart';
+import 'package:get/get.dart';
 
 class LoginPage extends StatefulWidget {
   final void Function()? togglePages;
@@ -13,27 +12,21 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  // text controllers
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  bool isPasswordVisible = false; // Track password visibility
 
-  //login button pressed
   void login() {
-    //prepare email & pw
     final String email = emailController.text;
     final String password = passwordController.text;
-
-    //auth cubit
     final authCubit = context.read<AuthCubit>();
 
-    //ensure that the email & pw fields are not empty
     if (email.isNotEmpty && password.isNotEmpty) {
-      //login!
       authCubit.login(email, password);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter both email and password!'),
+        SnackBar(
+          content: Text(("login_restrict".tr)),
         ),
       );
     }
@@ -46,93 +39,206 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  // BUILD UI
   @override
   Widget build(BuildContext context) {
-    // SCAFFOLD
     return Scaffold(
-      //BODY
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  //logo
-                  Icon(
-                    Icons.lock_open_rounded,
-                    size: 80,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-
-                  const SizedBox(height: 50),
-
-                  //welcome back
-                  Text(
-                    "Welcome back, you've been missed!",
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontSize: 16,
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFFFAF9F9),
+                Color(0xFFFAF9F9),
+              ],
+            ),
+          ),
+          child: Center(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/images/Logo_TinaVibe.png',
+                      height: 100,
                     ),
-                  ),
+                    const SizedBox(height: 50),
 
-                  const SizedBox(height: 25),
-
-                  // email textfield
-                  MyTextField(
-                    controller: emailController,
-                    hintText: "Email",
-                    obscureText: false,
-                  ),
-                  const SizedBox(height: 10),
-
-                  //pw textfield
-                  MyTextField(
-                    controller: passwordController,
-                    hintText: "Password",
-                    obscureText: true,
-                  ),
-                  const SizedBox(height: 25),
-
-                  //login button
-                  MyButton(
-                    onTap: login,
-                    text: "Login",
-                  ),
-                  const SizedBox(height: 50),
-
-                  //convert to register
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Not a member?",
+                    // Login title
+                    Center(
+                      child: Text(
+                        ("login_form_title".tr),
                         style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary),
+                          color: Colors.pink.shade200,
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      GestureDetector(
-                        onTap: widget.togglePages,
+                    ),
+                    const SizedBox(height: 20),
+                    Center(
+                      child: Text(
+                        ("login_form_banner".tr),
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Email TextField
+                    TextField(
+                      controller: emailController,
+                      decoration: InputDecoration(
+                        hintText: "Email",
+                        hintStyle: TextStyle(color: Colors.pink.shade200),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: Colors.pink.shade200, width: 2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: Colors.pink.shade200, width: 2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 10, horizontal: 20),
+                        prefixIcon:
+                            Icon(Icons.email, color: Colors.pink.shade200),
+                      ),
+                      style: TextStyle(color: Colors.pink.shade200),
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Password TextField with toggle icon
+                    TextField(
+                      controller: passwordController,
+                      obscureText: !isPasswordVisible,
+                      decoration: InputDecoration(
+                        hintText: ("login_input_pass".tr),
+                        hintStyle: TextStyle(color: Colors.pink.shade200),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: Colors.pink.shade200, width: 2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: Colors.pink.shade200, width: 2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 10, horizontal: 20),
+                        prefixIcon:
+                            Icon(Icons.lock, color: Colors.pink.shade200),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            isPasswordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: Colors.pink.shade200,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              isPasswordVisible = !isPasswordVisible;
+                            });
+                          },
+                        ),
+                      ),
+                      style: TextStyle(color: Colors.pink.shade200),
+                    ),
+                    const SizedBox(height: 25),
+
+                    // Login button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: login,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.pink.shade200,
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: BorderSide(
+                                color: Colors.pink.shade200, width: 2),
+                          ),
+                        ),
                         child: Text(
-                          " Register now",
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.inversePrimary,
-                            fontWeight: FontWeight.bold,
+                          ("login_form_title".tr),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 25),
-                  //google sign in button
-                  ElevatedButton(
-                    onPressed: () {
-                      context.read<AuthCubit>().signInWithGoogle();
-                    },
-                    child: const Text("Google Sign In"),
-                  ),
-                ],
+                    ),
+                    const SizedBox(height: 50),
+
+                    // Register link
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          ("login_navigate_text".tr),
+                          style: const TextStyle(color: Colors.black),
+                        ),
+                        GestureDetector(
+                          onTap: widget.togglePages,
+                          child: Text(
+                            ("login_navigate".tr),
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 25),
+
+                    // Sign in with Google button
+                    SizedBox(
+                      height: 40,
+                      width: 50,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          context.read<AuthCubit>().signInWithGoogle();
+                        },
+                        style: ButtonStyle(
+                          backgroundColor:
+                              WidgetStateProperty.all(const Color(0xFFF3ECEC)),
+                          foregroundColor:
+                              WidgetStateProperty.all(Colors.black),
+                          padding: WidgetStateProperty.all(
+                              const EdgeInsets.symmetric(vertical: 8)),
+                          shape:
+                              WidgetStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(5),
+                              side: const BorderSide(color: Color(0xFFFBF8FB)),
+                            ),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset(
+                              'assets/images/google.png',
+                              height: 24,
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

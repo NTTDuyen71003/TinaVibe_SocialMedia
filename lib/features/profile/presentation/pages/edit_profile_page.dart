@@ -9,6 +9,7 @@ import 'package:flutter_firebase_mxh_tinavibe/features/auth/presentation/compone
 import 'package:flutter_firebase_mxh_tinavibe/features/profile/domain/entities/profile_user.dart';
 import 'package:flutter_firebase_mxh_tinavibe/features/profile/presentation/cubits/profile_cubit.dart';
 import 'package:flutter_firebase_mxh_tinavibe/features/profile/presentation/cubits/profile_states.dart';
+import 'package:get/get.dart';
 
 class EditProfilePage extends StatefulWidget {
   final ProfileUser user;
@@ -23,16 +24,23 @@ class EditProfilePage extends StatefulWidget {
 }
 
 class _EditProfilePageState extends State<EditProfilePage> {
-  //mobile image pick
+  // Mobile image pick
   PlatformFile? imagePickedFile;
 
-  //web image pick
+  // Web image pick
   Uint8List? webImage;
 
   final bioTextController = TextEditingController();
   final nameTextController = TextEditingController();
 
-  //pick image
+  @override
+  void initState() {
+    super.initState();
+    // Initialize controllers with current user data
+    nameTextController.text = widget.user.name;
+    bioTextController.text = widget.user.bio;
+  }
+
   Future<void> pickImage() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.image,
@@ -49,12 +57,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
   }
 
-  //update profile button pressed
   void updateProfile() async {
-    //profile cubit
     final profileCubit = context.read<ProfileCubit>();
-
-    //prepare image
     final String uid = widget.user.uid;
     final String? newBio =
         bioTextController.text.isNotEmpty ? bioTextController.text : null;
@@ -63,12 +67,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
     final imageMobilePath = kIsWeb ? null : imagePickedFile?.path;
     final imageWebBytes = kIsWeb ? imagePickedFile?.bytes : null;
 
-    // Luôn lấy tên, nếu người dùng không nhập, dùng tên cũ
     final updatedName = nameTextController.text.isNotEmpty
         ? nameTextController.text
         : widget.user.name;
 
-    //only update if there is something change
     if (imagePickedFile != null || newBio != null || newName != null) {
       profileCubit.updateProfile(
         uid: uid,
@@ -77,10 +79,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         imageMobilePath: imageMobilePath,
         imageWebBytes: imageWebBytes,
       );
-    }
-
-    // nothing to update
-    else {
+    } else {
       Navigator.pop(context);
     }
   }
@@ -89,21 +88,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Widget build(BuildContext context) {
     return BlocConsumer<ProfileCubit, ProfileStates>(
       builder: (context, state) {
-        //profile loading..
         if (state is ProfileLoading) {
           return const Scaffold(
             body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(),
-                  Text("Uploading..."),
-                ],
-              ),
+              child: CircularProgressIndicator(),
             ),
           );
         } else {
-          //edit form
           return buildEditPage();
         }
       },
@@ -118,98 +109,109 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Widget buildEditPage() {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Edit Profile"),
-        centerTitle: true,
-        foregroundColor: Theme.of(context).colorScheme.primary,
-        actions: [
-          //save button
-          IconButton(
-            onPressed: updateProfile,
-            icon: const Icon(Icons.upload),
+        leading: Tooltip(
+          message:
+              ("goback_arrow".tr), // Translated tooltip for the back button
+          child: IconButton(
+            icon: const Icon(Icons.arrow_back), // Back arrow icon
+            onPressed: () {
+              Navigator.of(context).pop(); // Go back when pressed
+            },
           ),
-        ],
+        ),
+        title: Text(("edit_profile_title".tr)),
+        centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            //profile picture
-            Center(
-              child: Container(
-                height: 200,
-                width: 200,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.secondary,
-                  shape: BoxShape.circle,
-                ),
-                clipBehavior: Clip.hardEdge,
-                child:
-                    //display selected image for mobile
-                    (!kIsWeb && imagePickedFile != null)
-                        ? Image.file(
-                            File(imagePickedFile!.path!),
-                            fit: BoxFit.cover,
-                          )
-                        :
-                        //display selected image for web
-                        (kIsWeb && webImage != null)
-                            ? Image.memory(webImage!)
-                            :
-                            // no image selected -> display existing profile pic
-                            CachedNetworkImage(
-                                imageUrl: widget.user.profileImageUrl,
-                                //loading
-                                placeholder: (context, url) =>
-                                    const CircularProgressIndicator(),
-
-                                //error
-                                errorWidget: (context, url, error) => Icon(
-                                  Icons.person,
-                                  size: 72,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                                //loaded
-                                imageBuilder: (context, imageProvider) => Image(
-                                  image: imageProvider,
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 20.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Profile picture
+              Center(
+                child: GestureDetector(
+                  onTap: pickImage,
+                  child: Stack(
+                    children: [
+                      Container(
+                        height: 120,
+                        width: 120,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                              color: const Color(0xfff36f7d), width: 3),
+                        ),
+                        child: ClipOval(
+                          child: (!kIsWeb && imagePickedFile != null)
+                              ? Image.file(
+                                  File(imagePickedFile!.path!),
                                   fit: BoxFit.cover,
-                                ),
-                              ),
+                                )
+                              : (kIsWeb && webImage != null)
+                                  ? Image.memory(webImage!)
+                                  : CachedNetworkImage(
+                                      imageUrl: widget.user.profileImageUrl,
+                                      placeholder: (context, url) =>
+                                          const CircularProgressIndicator(),
+                                      errorWidget: (context, url, error) =>
+                                          const Icon(Icons.person, size: 72),
+                                      fit: BoxFit.cover,
+                                    ),
+                        ),
+                      ),
+                      const Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: CircleAvatar(
+                          backgroundColor: Color(0xfff36f7d),
+                          radius: 18,
+                          child: Icon(Icons.camera_alt, color: Colors.white),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(height: 20),
 
-            const SizedBox(height: 25),
+              // Name
+              // MyTextField(
+              //   controller: nameTextController,
+              //   hintText: "Enter your name",
+              //   obscureText: false,
+              // ),
+              // const SizedBox(height: 20),
 
-            //pick image button
-            Center(
-              child: MaterialButton(
-                onPressed: pickImage,
-                color: Colors.blue,
-                child: const Text("Pick image"),
+              // Bio
+              MyTextField(
+                controller: bioTextController,
+                hintText: ("edit_profile_bio".tr),
+                obscureText: false,
               ),
-            ),
+              const SizedBox(height: 40),
 
-            //name
-            // const Text("Name"),
-            // const SizedBox(height: 10),
-            // Padding(
-            //   padding: const EdgeInsets.symmetric(horizontal: 25.0),
-            //   child: MyTextField(
-            //       controller: nameTextController,
-            //       hintText: widget.user.name,
-            //       obscureText: false),
-            // ),
-            // const SizedBox(height: 25),
-
-            //bio
-            const Text("Bio"),
-            const SizedBox(height: 10),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25.0),
-              child: MyTextField(
-                  controller: bioTextController,
-                  hintText: widget.user.bio,
-                  obscureText: false),
-            ),
-          ],
+              // Save changes button
+              ElevatedButton(
+                onPressed: updateProfile,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      const Color(0xfff36f7d), // Set the background color
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+                child: const Text(
+                  "Lưu",
+                  style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.white), // Set text color to white
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_firebase_mxh_tinavibe/features/profile/domain/entities/profile_user.dart';
-import 'package:flutter_firebase_mxh_tinavibe/features/profile/domain/entities/repository/profile_repository.dart';
+import 'package:flutter_firebase_mxh_tinavibe/features/profile/domain/repo/profile_repository.dart';
 import 'package:flutter_firebase_mxh_tinavibe/features/profile/presentation/cubits/profile_states.dart';
 import 'package:flutter_firebase_mxh_tinavibe/features/storage/domain/storage_repository.dart';
 

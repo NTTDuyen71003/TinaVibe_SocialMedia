@@ -1,8 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_firebase_mxh_tinavibe/features/auth/presentation/components/my_button.dart';
-import 'package:flutter_firebase_mxh_tinavibe/features/auth/presentation/components/my_text_field.dart';
 import 'package:flutter_firebase_mxh_tinavibe/features/auth/presentation/cubits/auth_cubit.dart';
+import 'package:get/get.dart';
+
+class MyTextField extends StatelessWidget {
+  final TextEditingController controller;
+  final String hintText;
+  final bool obscureText;
+  final TextStyle textStyle;
+  final Color borderColor;
+  final Color backgroundColor;
+  final Icon prefixIcon;
+  final Widget? suffixIcon;
+  final double borderWidth;
+
+  const MyTextField({
+    super.key,
+    required this.controller,
+    required this.hintText,
+    required this.obscureText,
+    required this.textStyle,
+    required this.borderColor,
+    required this.backgroundColor,
+    required this.prefixIcon,
+    this.suffixIcon,
+    this.borderWidth = 2.0,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      obscureText: obscureText,
+      decoration: InputDecoration(
+        hintText: hintText,
+        hintStyle: textStyle,
+        prefixIcon: prefixIcon,
+        suffixIcon: suffixIcon,
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: borderColor, width: borderWidth),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: borderColor, width: borderWidth),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        filled: true,
+        fillColor: backgroundColor,
+      ),
+      style: textStyle,
+    );
+  }
+}
 
 class RegisterPage extends StatefulWidget {
   final void Function()? togglePages;
@@ -13,40 +63,36 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  // text controllers
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
-  // register button pressed
+  bool isPasswordVisible = false;
+  bool isConfirmPasswordVisible = false;
+
   void register() {
-    // prepare info
     final String name = nameController.text;
     final String email = emailController.text;
     final String password = passwordController.text;
     final String confirmPassword = confirmPasswordController.text;
-    // auth cubit
     final authCubit = context.read<AuthCubit>();
-    // ensure the fiels aren't empty
+
     if (email.isNotEmpty &&
         name.isNotEmpty &&
         password.isNotEmpty &&
         confirmPassword.isNotEmpty) {
-      //ensure password match
       if (password == confirmPassword) {
         authCubit.register(name, email, password);
-      }
-      //password do not match
-      else {
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Password do not match!")));
+          SnackBar(content: Text(("register_restrict_pass".tr))),
+        );
       }
-    }
-    // fields are empty display erroг
-    else {
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Please complete all fields")));
+        SnackBar(content: Text(("register_restrict".tr))),
+      );
     }
   }
 
@@ -59,12 +105,10 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
-// BUILD UI
   @override
   Widget build(BuildContext context) {
-// SCAFFOLD
     return Scaffold(
-      //BODY
+      backgroundColor: const Color(0xFFFAF9F9),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -73,92 +117,157 @@ class _RegisterPageState extends State<RegisterPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  //logo
-                  Icon(
-                    Icons.lock_open_rounded,
-                    size: 80,
-                    color: Theme.of(context).colorScheme.primary,
+                  Image.asset(
+                    'assets/images/Logo_TinaVibe.png',
+                    height: 100,
                   ),
-
                   const SizedBox(height: 50),
-
-                  //create account msg
                   Text(
-                    "Let's create an account for you!",
+                    ("login_navigate".tr),
                     style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontSize: 16,
+                      color: Colors.pink.shade200,
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-
+                  const SizedBox(height: 20),
+                  Text(
+                    ("register_form_banner".tr),
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 25),
-                  // name textfield
                   MyTextField(
                     controller: nameController,
-                    hintText: "Name",
+                    hintText: ("register_user_input".tr),
                     obscureText: false,
+                    textStyle: TextStyle(
+                        color:
+                            Colors.pink.shade200), // Change text color to pink
+                    borderColor: Colors.pink.shade200,
+                    backgroundColor: Colors.white,
+                    prefixIcon: Icon(Icons.person, color: Colors.pink.shade200),
+                    borderWidth: 2.0, // Set border thickness
                   ),
                   const SizedBox(height: 10),
-                  // email textfield
                   MyTextField(
                     controller: emailController,
                     hintText: "Email",
                     obscureText: false,
+                    textStyle: TextStyle(color: Colors.pink.shade200),
+                    borderColor: Colors.pink.shade200,
+                    backgroundColor: Colors.white,
+                    prefixIcon: Icon(Icons.email, color: Colors.pink.shade200),
+                    borderWidth: 2.0, // Set border thickness
                   ),
                   const SizedBox(height: 10),
-
-                  //pw textfield
                   MyTextField(
                     controller: passwordController,
-                    hintText: "Password",
-                    obscureText: true,
+                    hintText: ("login_input_pass".tr),
+                    obscureText: !isPasswordVisible,
+                    textStyle: TextStyle(color: Colors.pink.shade200),
+                    borderColor: Colors.pink.shade200,
+                    backgroundColor: Colors.white,
+                    prefixIcon: Icon(Icons.lock, color: Colors.pink.shade200),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        color: Colors.pink.shade200,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          isPasswordVisible = !isPasswordVisible;
+                        });
+                      },
+                    ),
+                    borderWidth: 2.0,
                   ),
                   const SizedBox(height: 10),
-
-                  //confirm pw textfield
                   MyTextField(
                     controller: confirmPasswordController,
-                    hintText: "Confirm password",
-                    obscureText: true,
+                    hintText: ("register_input_confirmpass".tr),
+                    obscureText: !isConfirmPasswordVisible,
+                    textStyle: TextStyle(color: Colors.pink.shade200),
+                    borderColor: Colors.pink.shade200,
+                    backgroundColor: Colors.white,
+                    prefixIcon: Icon(Icons.lock, color: Colors.pink.shade200),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        isConfirmPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        color: Colors.pink.shade200,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          isConfirmPasswordVisible = !isConfirmPasswordVisible;
+                        });
+                      },
+                    ),
+                    borderWidth: 2.0, // Set border thickness
                   ),
-
                   const SizedBox(height: 25),
-
-                  //register button
                   MyButton(
                     onTap: register,
-                    text: "Register",
+                    text: ("login_navigate".tr),
+                    color: Colors.pink.shade200,
                   ),
                   const SizedBox(height: 50),
-
-                  //convert to login
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        "Already a member?",
-                        style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary),
-                      ),
+                      Text(("register_navigate_text".tr),
+                          style: const TextStyle(color: Colors.black)),
                       GestureDetector(
                         onTap: widget.togglePages,
                         child: Text(
-                          " Login now",
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.inversePrimary,
+                          ("login_form_title".tr),
+                          style: const TextStyle(
+                            color: Colors.black,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                     ],
                   ),
-                  //google sign in button
-                  ElevatedButton(
-                    onPressed: () {
-                      context.read<AuthCubit>().signInWithGoogle();
-                    },
-                    child: const Text("Google Sign In"),
-                  ),
+                  const SizedBox(height: 25),
+                  SizedBox(
+                    height: 40,
+                    width: 35,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        context.read<AuthCubit>().signInWithGoogle();
+                      },
+                      style: ButtonStyle(
+                        backgroundColor:
+                            WidgetStateProperty.all(const Color(0xFFF3ECEC)),
+                        foregroundColor: WidgetStateProperty.all(Colors.black),
+                        padding: WidgetStateProperty.all(
+                            const EdgeInsets.symmetric(vertical: 8)),
+                        shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
+                            side: const BorderSide(color: Color(0xFFFBF8FB)),
+                          ),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            'assets/images/google.png',
+                            height: 24,
+                          ),
+                          const SizedBox(width: 8),
+                        ],
+                      ),
+                    ),
+                  )
                 ],
               ),
             ),

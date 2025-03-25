@@ -1,5 +1,5 @@
 /*
-States Management
+States Management : quản lý trạng thái cho quá trình xác thực, sử dụng Bloc
 */
 
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,10 +12,9 @@ class AuthCubit extends Cubit<AuthState> {
   AppUser? _currentUser;
   AuthCubit({required this.authRepository}) : super(AuthInitial());
 
-  // check if user is already authenticated
+  // kiểm tra xem người dùng xác thực(đăng nhập) hay chưa ?
   void checkAuth() async {
     final AppUser? user = await authRepository.getCurrentUser();
-
     if (user != null) {
       _currentUser = user;
       emit(Authenticated(user));
@@ -24,10 +23,10 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  // get current user
+  // lấy thông tin người dùng hiện tại
   AppUser? get currentUser => _currentUser;
 
-  // login with email + pw
+  // đăng nhập với email + mật khẩu.
   Future<void> login(String email, String password) async {
     try {
       emit(AuthLoading());
@@ -45,7 +44,7 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  // register with email + pw
+  // đăng ký người dùng mới với tên, email và mật khẩu.
   Future<void> register(String name, String email, String password) async {
     try {
       emit(AuthLoading());

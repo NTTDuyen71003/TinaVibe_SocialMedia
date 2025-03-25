@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class NameBox extends StatelessWidget {
   final String text;
@@ -14,7 +15,7 @@ class NameBox extends StatelessWidget {
       ),
       width: double.infinity,
       child: Text(
-        text.isNotEmpty ? text : "Empty name..",
+        text.isNotEmpty ? text : ("namestatus".tr),
         style: TextStyle(
           color: Theme.of(context).colorScheme.inversePrimary,
         ),

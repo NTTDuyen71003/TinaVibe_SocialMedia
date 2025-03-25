@@ -6,7 +6,7 @@ import 'package:flutter_firebase_mxh_tinavibe/features/post/domain/repository/po
 class FirebasePostRepository implements PostRepository {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  // store the posts in a collection called 'posts'
+  // lưu trữ bài viết trong collection có tên là posts
   final CollectionReference postsCollection =
       FirebaseFirestore.instance.collection('posts');
 
@@ -24,13 +24,23 @@ class FirebasePostRepository implements PostRepository {
     await postsCollection.doc(postId).delete();
   }
 
+  //update post
+  @override
+  Future<void> updatePost(
+      String postId, Map<String, dynamic> updatedData) async {
+    try {
+      await postsCollection.doc(postId).update(updatedData);
+    } catch (e) {
+      throw Exception("Error updating post: $e");
+    }
+  }
+
   @override
   Future<List<Post>> fetchAllPosts() async {
     try {
-      //get all posts with most recent posts at the top
       final postsSnapshot =
           await postsCollection.orderBy('timestamp', descending: true).get();
-      //convert each firestore document from json -> list of posts
+      // chuyển đổi mỗi dữ liệu bài viết trên firestore từ dạng json -> danh sách bài viết
       final List<Post> allPosts = postsSnapshot.docs
           .map((doc) => Post.fromJson(doc.data() as Map<String, dynamic>))
           .toList();
@@ -43,11 +53,10 @@ class FirebasePostRepository implements PostRepository {
   @override
   Future<List<Post>> fetchPostsByUserId(String userId) async {
     try {
-      //fetch posts snapshot with this uid
+      //tìm và nạp dữ liệu theo id của người dùng
       final postsSnapshot =
           await postsCollection.where('userId', isEqualTo: userId).get();
-
-      // convert firestore documents from json -> list of posts
+      // chuyển đổi mỗi dữ liệu bài viết trên firestore từ dạng json -> danh sách bài viết
       final userPosts = postsSnapshot.docs
           .map((doc) => Post.fromJson(doc.data() as Map<String, dynamic>))
           .toList();
@@ -63,7 +72,7 @@ class FirebasePostRepository implements PostRepository {
       final postDoc = await postsCollection.doc(postId).get();
       if (postDoc.exists) {
         final post = Post.fromJson(postDoc.data() as Map<String, dynamic>);
-        // check if user has already like this post
+        // kiểm tra xem người dùng đã like bài viết này hay chưa
         final hasLiked = post.likes.contains(userId);
 
         if (hasLiked) {
@@ -89,11 +98,11 @@ class FirebasePostRepository implements PostRepository {
       // get post document
       final postDoc = await postsCollection.doc(postId).get();
       if (postDoc.exists) {
-        // convert json object -> post
+        // chuyển đối tượng json -> bài viết
         final post = Post.fromJson(postDoc.data() as Map<String, dynamic>);
-        // add the new comment
+        // thêm bình luận
         post.comments.add(comment);
-        // update the post document in firestore
+        // cập nhật lại dữ liệu của bài viết đó trên firestore
         await postsCollection.doc(postId).update({
           'comments': post.comments.map((comment) => comment.toJson()).toList()
         });
@@ -108,14 +117,13 @@ class FirebasePostRepository implements PostRepository {
   @override
   Future<void> deleteComment(String postId, String commentId) async {
     try {
-      // get post document
       final postDoc = await postsCollection.doc(postId).get();
       if (postDoc.exists) {
-        // convert json object -> post
+        // chuyển đối tượng json -> bài viết
         final post = Post.fromJson(postDoc.data() as Map<String, dynamic>);
-        // add the new comment
+        //xoá bình luận
         post.comments.removeWhere((comment) => comment.id == commentId);
-        // update the post document in firestore
+        // cập nhật lại dữ liệu của bài viết đó trên firestore
         await postsCollection.doc(postId).update({
           'comments': post.comments.map((comment) => comment.toJson()).toList()
         });
